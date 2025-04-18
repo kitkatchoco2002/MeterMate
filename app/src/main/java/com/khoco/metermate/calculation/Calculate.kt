@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,12 +26,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.khoco.metermate.model.PowerRates
+import com.khoco.metermate.network.RetrofitInstance
 import com.khoco.metermate.ui.theme.Background
 import com.khoco.metermate.ui.theme.BlackTheme
 import com.khoco.metermate.ui.theme.RedTheme
 import com.khoco.metermate.ui.theme.YellowTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -40,10 +45,16 @@ fun Calculation() {
     var currentReading by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("On-Grid") }
     var totalBill by remember { mutableStateOf<Double?>(null) }
+    var powerRates by remember { mutableStateOf<PowerRates?>(null) }
 
-    // Fixed charges and rates
-    val fixedCharge = 5.6
-    val ratePerKwh = if (selectedType == "On-Grid") 11.2924 else 10.12
+    LaunchedEffect(true) {
+        try {
+            powerRates = RetrofitInstance.api.getPowerRates()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -103,6 +114,10 @@ fun Calculation() {
                 val prev = previousReading.toDoubleOrNull() ?: 0.0
                 val curr = currentReading.toDoubleOrNull() ?: 0.0
                 val unitsUsed = (curr - prev).coerceAtLeast(0.0) // Avoid negative usage
+
+                // Fixed charges and rates
+                val fixedCharge = powerRates?.fixedCharge ?: 0.0
+                val ratePerKwh = if (selectedType == "On-Grid") powerRates?.onGridRate ?: 0.0 else powerRates?.offGridRate ?: 0.0
 
                 // Calculate total bill
                 if(selectedType == "On-Grid"){

@@ -66,4 +66,13 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
     // Material 3
     implementation("androidx.compose.material3:material3:1.1.2")
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    // Gson converter
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Optional: Coroutine support for Retrofit
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
 }
